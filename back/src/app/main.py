@@ -48,16 +48,16 @@ def reset_game(db: Session = Depends(get_db)):
     return crud.reset(db)
 
 
-@app.post("/players/", response_model=schemas.PlayerResponse)
+@app.post("/players", response_model=schemas.GameState)
 def create_new_player(player: schemas.PlayerCreate, db: Session = Depends(get_db)):
     """Create a new player"""
-    crud.create_player(db, player)
+    return crud.create_player(db, player)
 
 
 @app.get("/games/history", response_model=List[schemas.GameHistoryResponse])
-def get_games_history(player_id: int, db: Session = Depends(get_db)):
+def get_games_history(db: Session = Depends(get_db)):
     """Get games of the player"""
-    return crud.get_history(db, player_id)
+    return crud.get_history(db)
 
 
 @app.post("/games/record")

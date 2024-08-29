@@ -14,25 +14,16 @@ class GameStateDB(Base):
     id = Column(Integer, primary_key=True, index=True)
     board = Column(String, default=json.dumps([[0] * 7 for _ in range(6)]))
     current_player = Column(Integer, default=1)
-    winner = Column(Integer)
-
-
-class Player(Base):
-    __tablename__ = "players"
-
-    id = Column(Integer, primary_key=True, index=True)
-    pseudo = Column(String, unique=True, index=True)
-
-    games = relationship("GameHistory", back_populates="player")
+    player1 = Column(String, default="Player 1")
+    player2 = Column(String, default="Player 2")
+    winner = Column(String, default="")
 
 
 class GameHistory(Base):
     __tablename__ = "game_history"
 
     id = Column(Integer, primary_key=True, index=True)
-    player_id = Column(Integer, ForeignKey("players.id"))
-    opponent = Column(String)
-    winner = Column(Integer)
+    winner = Column(String)
+    loser = Column(String)
+    pieces = Column(Integer, default=0)
     date_played = Column(DateTime, default=datetime.utcnow)
-
-    player = relationship("Player", back_populates="games")

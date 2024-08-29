@@ -12,6 +12,8 @@ def start_game(db: Session):
     return schemas.GameState(
         board=json.loads(state_db.board),
         current_player=state_db.current_player,
+        player1=state_db.player1,
+        player2=state_db.player2,
         winner=state_db.winner,
     )
 
@@ -36,8 +38,10 @@ def play(db: Session, column: int):
             break
 
     if check_winner(board, row, column, state_db.current_player):
-        state_db.winner = state_db.current_player
-
+        if (state_db.current_player == 1):
+            state_db.winner = state_db.player1
+        else:
+            state_db.winner = state_db.player2
     state_db.current_player = 3 - state_db.current_player
     state_db.board = json.dumps(board)
     db.commit()
@@ -45,6 +49,8 @@ def play(db: Session, column: int):
     return schemas.GameState(
         board=board,
         current_player=state_db.current_player,
+        player1=state_db.player1,
+        player2=state_db.player2,
         winner=state_db.winner,
     )
 
@@ -57,31 +63,42 @@ def reset(db: Session):
         db.add(state_db)
     state_db.board = json.dumps([[0] * 7 for _ in range(6)])
     state_db.current_player = 1
-    state_db.winner = 0
+    state_db.winner = ""
     db.commit()
 
     return schemas.GameState(
         board=json.loads(state_db.board),
         current_player=state_db.current_player,
+        player1=state_db.player1,
+        player2=state_db.player2,
         winner=state_db.winner,
     )
 
 
 def create_player(db: Session, player: schemas.PlayerCreate):
     """create a new player"""
-    db_player = db.query(models.Player).filter(models.Player.pseudo == player.pseudo).first()
-    if db_player:
-        raise exceptions.AlreadyExistingPseudoException(player.pseudo)
-    new_player = models.Player(pseudo=player.pseudo)
-    db.add(new_player)
+    state_db = db.query(models.GameStateDB).first()
+    if state_db is None:
+        state_db = models.GameStateDB()
+        db.add(state_db)
+    state_db.board = json.dumps([[0] * 7 for _ in range(6)])
+    state_db.current_player = 1
+    state_db.player1 = player.player1
+    state_db.player2 = player.player2
+    state_db.winner = ""
     db.commit()
-    db.refresh(new_player)
-    return new_player
+    return schemas.GameState(
+        board=json.loads(state_db.board),
+        current_player=state_db.current_player,
+        player1=state_db.player1,
+        player2=state_db.player2,
+        winner=state_db.winner,
+    )
 
 
-def get_history(db: Session, player_id: int):
+def get_history(db: Session):
     """return history for a player"""
-    return db.query(models.GameHistory).filter(models.GameHistory.player_id == player_id).all()
+    return db.query(models.GameHistory).all()
 
 
 def record_game(db: Session, game: schemas.GameHistoryCreate):

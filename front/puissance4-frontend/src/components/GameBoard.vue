@@ -1,0 +1,220 @@
+<template>
+  <div class="game-board">
+    <!-- <PlayerForm v-if="!player1" @pseudoSaved="onPseudoSaved" /> -->
+    <div class="player-form" v-if="!pseudook">
+      <h2>Enter your Pseudos</h2>
+      <input v-model="player1" placeholder="Player 1">
+      <input v-model="player2" placeholder="Player 2">
+      <button @click="savePseudo">Save</button>
+    </div>
+    <div v-else>
+      <div v-if="message" class="message">{{ message }}</div>
+      <table>
+        <tr v-for="(row, rowIndex) in board" :key="rowIndex">
+          <td v-for="(cell, colIndex) in row" :key="colIndex" @click="play(colIndex)">
+            <div :class="['cell', getCellClass(cell)]"></div>
+          </td>
+        </tr>
+      </table>
+      <button @click="resetGame">Reset Game</button>
+      <button @click="resetPseudos">Reset Pseudos</button>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      board: [],
+      currentPlayer: 1,
+      message: "",
+      winner: "",
+      player1: "",
+      player2: "",
+      pseudook: false,
+    };
+  },
+
+  methods: {
+    async savePseudo() {
+        try {
+          await axios.post('http://localhost:8000/players/', {
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+            },
+            player1: this.player1,
+            player2: this.player2
+        });
+        this.pseudook = true
+        this.message = `${this.player1}'s turn`;
+        } catch (error) {
+          console.error(error);
+        }
+    },
+    async fetchGameState() {
+      try {
+        const response = await axios.get('http://localhost:8000/game', {
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+            }
+      });
+        this.board = response.data.board;
+        this.currentPlayer = response.data.current_player;
+        this.player1 = response.data.player1;
+        this.player2 = response.data.player2;
+        this.winner = response.data.winner;
+        if (this.winner) {
+          this.message = `${this.winner} wins!`;
+          this.recordGameHistory(this.winner, this.player1, this.player2, this.currentPlayer);
+        } else {
+          if (this.currentPlayer == 1) {
+            this.message = `${this.player1}'s turn`;
+          }
+          else {
+            this.message = `${this.player2}'s turn`;
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async play(column) {
+      if (this.winner) {
+        this.message = `${this.winner} has already won. Please reset the game.`;
+        return;
+      }
+
+      try {
+        const response = await axios.post(`http://localhost:8000/play/${column}`, {
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+            }
+      });
+        this.board = response.data.board;
+        this.currentPlayer = response.data.current_player;
+        this.player1 = response.data.player1;
+        this.player2 = response.data.player2;
+        this.winner = response.data.winner;
+        if (this.winner) {
+          this.message = `${this.winner} wins!`;
+          this.recordGameHistory(this.winner, this.player1, this.player2, this.currentPlayer);
+        } else {
+          if (this.currentPlayer == 1) {
+            this.message = `${this.player1}'s turn`;
+          }
+          else {
+            this.message = `${this.player2}'s turn`;
+          }        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async resetGame() {
+      try {
+        const response = await axios.post('http://localhost:8000/reset', {
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+            }
+      });
+        this.board = response.data.board;
+        this.currentPlayer = response.data.current_player;
+        this.player1 = response.data.player1;
+        this.player2 = response.data.player2;
+        this.winner = "";
+        this.message = `${this.player1}'s turn`;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async resetPseudos() {
+      this.resetGame()
+      this.pseudook = false;
+    },
+    async recordGameHistory(winner, player1, player2, current_player) {
+      try {
+        let loser = player1;
+        if (current_player == 2) {
+          loser = player2
+        }
+        await axios.post('http://localhost:8000/games/record', {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+          },
+          winner: winner,
+          loser: loser,
+          pieces: 0
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    getCellClass(cell) {
+      if (cell === 1) return 'player1';
+      if (cell === 2) return 'player2';
+      return 'empty';
+    },
+    onPseudoSaved(player) {
+      this.playerId = player.id;
+    }
+  },
+  mounted() {
+    this.fetchGameState();
+  }
+};
+</script>
+
+<style scoped>
+  .game-board {
+    text-align: center;
+    margin-top: 20px;
+  }
+  table {
+    margin: 0 auto;
+    border-spacing: 10px;
+  }
+  td {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+  }
+  .cell {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+  }
+  .cell.empty {
+    background-color: #e0e0e0;
+  }
+  .cell.player1 {
+    background-color: #f00;
+  }
+  .cell.player2 {
+    background-color: #00f;
+  }
+  .message {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+  }
+  button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+  }
+
+  .player-form {
+    text-align: center;
+    margin-top: 20px;
+  }
+  input {
+    margin-bottom: 10px;
+    padding: 5px;
+  }
+  .pseudos {
+    padding: 5px 10px;
+  }
+  </style>
+  

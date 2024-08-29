@@ -6,11 +6,14 @@ class GameState(BaseModel):
     """gamestate schemas"""
     board: list[list[int]]
     current_player: int
+    player1: str
+    player2: str
     winner: str
 
 
 class PlayerCreate(BaseModel):
-    pseudo: str
+    player1: str
+    player2: str
 
 
 class PlayerResponse(BaseModel):
@@ -22,16 +25,16 @@ class PlayerResponse(BaseModel):
 
 
 class GameHistoryCreate(BaseModel):
-    player_id: int
-    opponent: str
-    winner: int
+    winner: str
+    loser: str
+    pieces: int
 
 
 class GameHistoryResponse(BaseModel):
     id: int
-    player_id: int
-    opponent: str
-    winner: int
+    winner: str
+    loser: str
+    pieces: int
     date_played: datetime
 
     class Config:
