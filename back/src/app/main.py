@@ -69,12 +69,6 @@ def record_game_history(game: schemas.GameHistoryCreate, db: Session = Depends(g
     return crud.record_game(db, game)
 
 
-# @app.post("/pseudo", response_model=schemas.GameState)
-# def pseudo(pseudos: schemas.Pseudo, db: Session = Depends(get_db)):
-#     """To set pseudos"""
-#     return crud.set_pseudo(db, pseudos.name, pseudos.player)
-
-
 @app.exception_handler(exceptions.NoGameFoundException)
 def no_game_found_exception_handler(request: Request, exc: exceptions.NoGameFoundException):
     """returns a 404 error"""

@@ -1,14 +1,14 @@
 import json
 from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, DateTime
 
 
 Base = declarative_base()
 
 
 class GameStateDB(Base):
+    """table for games"""
     __tablename__ = "gamestate"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -21,6 +21,7 @@ class GameStateDB(Base):
 
 
 class GameHistory(Base):
+    """table for games history"""
     __tablename__ = "game_history"
 
     id = Column(Integer, primary_key=True, index=True)

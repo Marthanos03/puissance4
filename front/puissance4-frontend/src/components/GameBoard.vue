@@ -1,6 +1,5 @@
 <template>
   <div class="game-board">
-    <!-- <PlayerForm v-if="!player1" @pseudoSaved="onPseudoSaved" /> -->
     <div class="player-form" v-if="!pseudook">
       <h2>Enter your Pseudos</h2>
       <input v-model="player1" placeholder="Player 1">

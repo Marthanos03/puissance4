@@ -13,25 +13,20 @@ class GameState(BaseModel):
 
 
 class PlayerCreate(BaseModel):
+    """To create a player"""
     player1: str
     player2: str
 
 
-class PlayerResponse(BaseModel):
-    id: int
-    pseudo: str
-
-    class Config:
-        orm_mode = True
-
-
 class GameHistoryCreate(BaseModel):
+    """To add a game to the history"""
     winner: str
     loser: str
     pieces: int
 
 
 class GameHistoryResponse(BaseModel):
+    """Response after adding a game to the history"""
     id: int
     winner: str
     loser: str

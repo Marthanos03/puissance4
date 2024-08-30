@@ -115,20 +115,3 @@ def record_game(db: Session, game: schemas.GameHistoryCreate):
     db.commit()
     db.refresh(db_game)
     return db_game
-
-
-# def set_pseudo(db: Session, pseudo: str, player: int):
-#     """To set pseudos"""
-#     state_db = db.query(models.GameStateDB).first()
-#     if state_db is None:
-#         raise exceptions.NoGameFoundException()
-#     if player == 1:
-#         state_db.player1 = pseudo
-#     elif player == 2:
-#         state_db.player2 = pseudo
-#     db.commit()
-#     return schemas.GameState(
-#         board=json.loads(state_db.board),
-#         current_player=state_db.current_player,
-#         winner=state_db.winner,
-#     )
