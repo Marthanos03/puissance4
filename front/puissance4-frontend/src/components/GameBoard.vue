@@ -42,10 +42,10 @@ export default {
       currentPlayer: 1,
       message: "",
       winner: "",
-      player1: "",
-      player2: "",
+      player1: "Player 1",
+      player2: "Player 2",
       pieces: 0,
-      pseudook: false,
+      pseudook: true,
       history: false,
       games: [],
     };
