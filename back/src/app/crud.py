@@ -15,6 +15,7 @@ def start_game(db: Session):
         player1=state_db.player1,
         player2=state_db.player2,
         winner=state_db.winner,
+        pieces=state_db.pieces
     )
 
 
@@ -38,12 +39,13 @@ def play(db: Session, column: int):
             break
 
     if check_winner(board, row, column, state_db.current_player):
-        if (state_db.current_player == 1):
+        if state_db.current_player == 1:
             state_db.winner = state_db.player1
         else:
             state_db.winner = state_db.player2
     state_db.current_player = 3 - state_db.current_player
     state_db.board = json.dumps(board)
+    state_db.pieces += 1
     db.commit()
 
     return schemas.GameState(
@@ -52,6 +54,7 @@ def play(db: Session, column: int):
         player1=state_db.player1,
         player2=state_db.player2,
         winner=state_db.winner,
+        pieces=state_db.pieces
     )
 
 
@@ -64,6 +67,7 @@ def reset(db: Session):
     state_db.board = json.dumps([[0] * 7 for _ in range(6)])
     state_db.current_player = 1
     state_db.winner = ""
+    state_db.pieces = 0
     db.commit()
 
     return schemas.GameState(
@@ -72,6 +76,7 @@ def reset(db: Session):
         player1=state_db.player1,
         player2=state_db.player2,
         winner=state_db.winner,
+        pieces=state_db.pieces
     )
 
 
@@ -86,6 +91,7 @@ def create_player(db: Session, player: schemas.PlayerCreate):
     state_db.player1 = player.player1
     state_db.player2 = player.player2
     state_db.winner = ""
+    state_db.pieces = 0
     db.commit()
     return schemas.GameState(
         board=json.loads(state_db.board),
@@ -93,6 +99,7 @@ def create_player(db: Session, player: schemas.PlayerCreate):
         player1=state_db.player1,
         player2=state_db.player2,
         winner=state_db.winner,
+        pieces=state_db.pieces
     )
 
 

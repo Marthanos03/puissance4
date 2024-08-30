@@ -9,6 +9,7 @@ class GameState(BaseModel):
     player1: str
     player2: str
     winner: str
+    pieces: int
 
 
 class PlayerCreate(BaseModel):

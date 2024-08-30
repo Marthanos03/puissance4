@@ -17,6 +17,7 @@ class GameStateDB(Base):
     player1 = Column(String, default="Player 1")
     player2 = Column(String, default="Player 2")
     winner = Column(String, default="")
+    pieces = Column(Integer, default=0)
 
 
 class GameHistory(Base):

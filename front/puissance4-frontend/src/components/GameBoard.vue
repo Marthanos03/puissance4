@@ -7,7 +7,7 @@
       <input v-model="player2" placeholder="Player 2">
       <button @click="savePseudo">Save</button>
     </div>
-    <div v-else>
+    <div v-else-if="!history">
       <div v-if="message" class="message">{{ message }}</div>
       <table>
         <tr v-for="(row, rowIndex) in board" :key="rowIndex">
@@ -18,6 +18,16 @@
       </table>
       <button @click="resetGame">Reset Game</button>
       <button @click="resetPseudos">Reset Pseudos</button>
+      <button @click="seeHistory">See history</button>
+    </div>
+    <div v-else>
+      <h2>History</h2>
+      <button @click="GoToGame">Go back to the game</button>
+      <ul>
+        <li v-for="game in games" :key="game.id">
+          {{ game.winner }} won against {{ game.loser }} with {{ game.pieces }} pieces at {{ game.date_played }}.
+        </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -34,11 +44,30 @@ export default {
       winner: "",
       player1: "",
       player2: "",
+      pieces: 0,
       pseudook: false,
+      history: false,
+      games: [],
     };
   },
 
   methods: {
+    async GoToGame() {
+      this.history = false;
+    },
+    async seeHistory() {
+      try {
+        const response = await axios.get('http://localhost:8000/games/history', {
+          headers: {
+                "Access-Control-Allow-Origin": "*",
+            }
+      });
+      this.games = response.data
+      this.history = true
+      } catch (error) {
+          console.error(error);
+        }
+    },
     async savePseudo() {
         try {
           await axios.post('http://localhost:8000/players/', {
@@ -66,9 +95,10 @@ export default {
         this.player1 = response.data.player1;
         this.player2 = response.data.player2;
         this.winner = response.data.winner;
+        this.pieces = response.data.pieces;
         if (this.winner) {
           this.message = `${this.winner} wins!`;
-          this.recordGameHistory(this.winner, this.player1, this.player2, this.currentPlayer);
+          this.recordGameHistory(this.winner, this.player1, this.player2, this.currentPlayer, this.pieces);
         } else {
           if (this.currentPlayer == 1) {
             this.message = `${this.player1}'s turn`;
@@ -98,9 +128,10 @@ export default {
         this.player1 = response.data.player1;
         this.player2 = response.data.player2;
         this.winner = response.data.winner;
+        this.pieces = response.data.pieces;
         if (this.winner) {
           this.message = `${this.winner} wins!`;
-          this.recordGameHistory(this.winner, this.player1, this.player2, this.currentPlayer);
+          this.recordGameHistory(this.winner, this.player1, this.player2, this.currentPlayer, this.pieces);
         } else {
           if (this.currentPlayer == 1) {
             this.message = `${this.player1}'s turn`;
@@ -124,6 +155,7 @@ export default {
         this.player1 = response.data.player1;
         this.player2 = response.data.player2;
         this.winner = "";
+        this.pieces = response.data.pieces;
         this.message = `${this.player1}'s turn`;
       } catch (error) {
         console.error(error);
@@ -133,7 +165,7 @@ export default {
       this.resetGame()
       this.pseudook = false;
     },
-    async recordGameHistory(winner, player1, player2, current_player) {
+    async recordGameHistory(winner, player1, player2, current_player, pieces) {
       try {
         let loser = player1;
         if (current_player == 2) {
@@ -145,7 +177,7 @@ export default {
           },
           winner: winner,
           loser: loser,
-          pieces: 0
+          pieces: (pieces + 1) / 2
         });
       } catch (error) {
         console.error(error);
