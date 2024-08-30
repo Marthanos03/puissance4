@@ -14,6 +14,9 @@ app = FastAPI()
 origins = [
     "http://localhost:8080",
     "http://localhost:8000",
+    "https://puissance4-eight.vercel.app/"
+    "https://puissance4-martins-projects-0ce88cb6.vercel.app/"
+    "https://puissance4-741d39802c9e.herokuapp.com/"
 ]
 app.add_middleware(
     CORSMiddleware,

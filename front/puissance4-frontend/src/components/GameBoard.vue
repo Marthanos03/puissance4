@@ -35,6 +35,16 @@
 <script>
 import axios from 'axios';
 
+const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:8000';
+
+const apiClient = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+  },
+});
+
 export default {
   data() {
     return {
@@ -56,13 +66,8 @@ export default {
       this.history = false;
     },
     async seeHistory() {
-      const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:8000';
       try {
-        const response = await axios.get(`${API_URL}/games/history`, {
-          headers: {
-                "Access-Control-Allow-Origin": "*",
-            }
-      });
+        const response = await apiClient.get(`/games/history`);
       this.games = response.data
       this.history = true
       } catch (error) {
@@ -70,12 +75,8 @@ export default {
         }
     },
     async savePseudo() {
-      const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:8000';
         try {
-          await axios.post(`${API_URL}/players/`, {
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-            },
+          await apiClient.post(`/players/`, {
             player1: this.player1,
             player2: this.player2
         });
@@ -86,13 +87,8 @@ export default {
         }
     },
     async fetchGameState() {
-      const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:8000';
       try {
-        const response = await axios.get(`${API_URL}/game`, {
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-            }
-      });
+        const response = await apiClient.get(`/game`);
         this.board = response.data.board;
         this.currentPlayer = response.data.current_player;
         this.player1 = response.data.player1;
@@ -115,17 +111,12 @@ export default {
       }
     },
     async play(column) {
-      const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:8000';
       if (this.winner) {
         this.message = `${this.winner} has already won. Please reset the game.`;
         return;
       }
       try {
-        const response = await axios.post(`${API_URL}/play/${column}`, {
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-            }
-      });
+        const response = await apiClient.post(`/play/${column}`);
         this.board = response.data.board;
         this.currentPlayer = response.data.current_player;
         this.player1 = response.data.player1;
@@ -147,13 +138,8 @@ export default {
       }
     },
     async resetGame() {
-      const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:8000';
       try {
-        const response = await axios.post(`${API_URL}/reset`, {
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-            }
-      });
+        const response = await apiClient.post(`/reset`);
         this.board = response.data.board;
         this.currentPlayer = response.data.current_player;
         this.player1 = response.data.player1;
@@ -170,16 +156,12 @@ export default {
       this.pseudook = false;
     },
     async recordGameHistory(winner, player1, player2, current_player, pieces) {
-      const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:8000';
       try {
         let loser = player1;
         if (current_player == 2) {
           loser = player2
         }
-        await axios.post(`${API_URL}/games/record`, {
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-          },
+        await apiClient.post(`/games/record`, {
           winner: winner,
           loser: loser,
           pieces: (pieces + 1) / 2
