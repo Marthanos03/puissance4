@@ -39,6 +39,7 @@ const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:8000';
 
 const apiClient = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
