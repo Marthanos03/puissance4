@@ -45,7 +45,7 @@ export default {
       player1: "Player 1",
       player2: "Player 2",
       pieces: 0,
-      pseudook: true,
+      pseudook: false,
       history: false,
       games: [],
     };
